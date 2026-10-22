@@ -33,3 +33,10 @@ The trade-off: the function yields strings, not `ipaddress.IPv4Address`/`IPv6Add
 - **IPv6 any prefix**: the network address (all-zero host bits) is returned as a host. IPv6 has no broadcast; per RFC 4291 every address in the block is a valid host.
 - **Strict mode only**: `iter_hosts("192.0.2.5/29")` raises `ValueError`. The input must be a true network address (host bits zero). This prevents silent off-by-N iteration when a caller passes a host address by mistake.
 - **Large prefixes**: `10.0.0.0/8` yields ~16.7 million addresses. The iterator is lazy, but materialising the whole thing with `list()` will allocate that much. Stream it.
+
+## Design notes
+
+The window stores values eagerly rather than keeping running aggregates. Running
+sums drift with floating point over long streams, and recomputing from a small
+buffer is cheap enough that the drift is not worth the speed.
+
